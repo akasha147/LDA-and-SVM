@@ -1,13 +1,12 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse as py
-
-import os
+import time
 
 import parser
 import converter
 import utils
-import time
 import SVM
 
 
@@ -15,7 +14,6 @@ def visualize(X_reduced, Y, n_classes):
     class_data = []
 
     Y_sorted_indices = Y.argsort()
-
     X_sorted = X_reduced[Y_sorted_indices]
     Y_sorted = Y[Y_sorted_indices]
 
@@ -23,15 +21,12 @@ def visualize(X_reduced, Y, n_classes):
 
     for i in range(n_classes):
         position = np.searchsorted(Y_sorted, i, side='right')
-
         class_data.append(X_sorted[k:position])
-
         k = position
 
     colors = ['r', 'b']
 
     for i in range(n_classes):
-
         plt.scatter(class_data[i][:,0], class_data[i][:,1], color=colors[i])
 
     plt.xlabel('dim_1')
@@ -59,22 +54,18 @@ def main():
     Y = np.zeros(1)
 
     visualise = False
-
     if args.visualise == 'True':
         visualise = True
 
     labels_path = args.labels_path
 
     combined = False
-
     if args.combined == 'True':
         combined = True
 
     if dataset_type == 'txt':
-
         if combined:
             converter.convert(dataset_path, combined)
-
         else:
             converter.convert(dataset_path, combined, labels_path=labels_path)
 
@@ -82,21 +73,13 @@ def main():
         Y = np.load('datasets_npy/' + dataset_name + '_labels' + '.npy')
 
     elif dataset_type == 'npy':
-
         if combined:
-
             data = np.load(dataset_path)
-
             X = data[:, 0:-1]
-
             Y = data[:, -1]
-
         else:
-
             X = np.load(dataset_path)
-
             Y = np.load(labels_path)
-
 
     X_train, X_test, Y_train, Y_test = utils.train_test_split(X, Y, train_split)
 
@@ -111,9 +94,7 @@ def main():
     np.save('datasets_npy/' + dataset_name_sans_extension + '/' + dataset_name_sans_extension + '_labels_train', Y_train)
     np.save('datasets_npy/' + dataset_name_sans_extension + '/' + dataset_name_sans_extension + '_labels_test', Y_test)
 
-
     mysvm = SVM.SVM({'X_train': X_train, 'Y_train': Y_train, 'kernel': 'gaussian_kernel', 'c_param': c_param})
-
     mysvm.fit()
 
     y_predict = mysvm.predict(X_test)
@@ -126,5 +107,6 @@ def main():
   
 
 time_start = time.time();
+print("Starting at " + str(time_start))
 main()
-print(time.time() - time_start)
+print("Completed at " + str(time.time() - time_start))
