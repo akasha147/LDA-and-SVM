@@ -17,21 +17,15 @@ class SVM:
         self.Y_train = np.squeeze(args['Y_train'])
         self.kernel = args['kernel']
         self.C = args['c_param']
-
         self.n = self.X_train.shape[0]
         self.n_dims = self.X_train.shape[1]
-
-        #print(self.Y_train)
-
         self.Y_train = np.where(self.Y_train == 0, -1 * np.ones_like(self.Y_train), self.Y_train)
-
-        #print(self.Y_train)
 
         self.lambdas = None
         self.bias = None
-        self.sv=None
-        self.sv_y=None
-        self.w=None
+        self.sv = None
+        self.sv_y = None
+        self.w = None
 
     def linear_kernel(self,x1, x2):
         return np.dot(x1, x2)
@@ -42,9 +36,7 @@ class SVM:
     def gaussian_kernel(self,x, y, sigma=5.0):
         return np.exp(-linalg.norm(x-y)**2 / (2 * (sigma ** 2)))
 
-
     def kernel_function(self, x, y,p=2,sigma=5.0):
-
         if self.kernel == 'linear_kernel':
             return np.dot(x, y)
         if self.kernel == 'polynomial_kernel':
@@ -53,17 +45,15 @@ class SVM:
             return np.exp(-linalg.norm(x-y)**2 / (2 * (sigma ** 2)))
 
     def fit(self):
-     
-        #print(self.kernel_function(self.X_train[0],self.X_train[1]))
         # Gram matrix
         K = np.zeros((self.n, self.n))
         for i in range(self.n):
             for j in range(self.n):
                 K[i,j] = self.kernel_function(self.X_train[i], self.X_train[j])
 
-        P = cvxopt.matrix(np.outer(self.Y_train,self.Y_train) * K)
+        P = cvxopt.matrix(np.outer(self.Y_train, self.Y_train) * K)
         q = cvxopt.matrix(np.ones(self.n) * -1)
-        tmp=self.Y_train.astype(np.double)
+        tmp = self.Y_train.astype(np.double)
         A = cvxopt.matrix(tmp, (1,self.n))
         b = cvxopt.matrix(0.0)
 
@@ -78,7 +68,7 @@ class SVM:
             tmp2 = np.ones(self.n) * self.C
             h = cvxopt.matrix(np.hstack((tmp1, tmp2)))
 
-        # solve QP problem
+        # Solve QP problem
         solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 
         # Lagrange multipliers
@@ -90,7 +80,6 @@ class SVM:
         self.lambdas = a[sv]
         self.sv = self.X_train[sv]
         self.sv_y = self.Y_train[sv]
-        #print("%d support vectors out of %d points" % (len(self.lambdas), n))
 
         # Intercept
         self.bias = 0
@@ -121,5 +110,3 @@ class SVM:
 
     def predict(self, X):
         return np.sign(self.project(X))
-
-    
